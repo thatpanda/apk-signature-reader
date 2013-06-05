@@ -70,6 +70,8 @@ public class MainForm {
             FileSystemView fileSystemView = FileSystemView.getFileSystemView();
             
             final JFileChooser fileChooser = new JFileChooser(fileSystemView.getHomeDirectory());
+            fileChooser.setFileFilter(new ApkFilter());
+            
             if( fileChooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION ) {
                 return;
             }
