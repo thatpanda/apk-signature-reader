@@ -26,6 +26,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileSystemView;
 
 public class MainForm {
@@ -79,21 +80,44 @@ public class MainForm {
             File file = fileChooser.getSelectedFile();
             if (file != null) {
                 fileLabel.setText(file.getName());
+                textArea.setText("loading...");
                 
-                PackageParser parser = new PackageParser();
-                String[] keyhashes = parser.getFacebookKeyHashes( file.getAbsolutePath() );
-                if (keyhashes != null ) {
-                    String str = "";
-                    for (String keyhash : keyhashes) {
-                        if (!str.isEmpty()) {
-                            str += "\n";
-                        }
-                        str += keyhash;
+                new ParseFileTask(file.getAbsolutePath()).execute();
+            }
+        }
+    }
+    
+    private class ParseFileTask extends SwingWorker<String, Object> {
+        private String filepath;
+        
+        public ParseFileTask(String path) {
+            filepath = path;
+        }
+        
+        @Override
+        public String doInBackground() {
+            PackageParser parser = new PackageParser();
+            String[] keyhashes = parser.getFacebookKeyHashes(filepath);
+            if (keyhashes != null ) {
+                String str = "";
+                for (String keyhash : keyhashes) {
+                    if (!str.isEmpty()) {
+                        str += "\n";
                     }
-                    textArea.setText(str);
-                } else {
-                    textArea.setText(parser.getError());
+                    str += keyhash;
                 }
+                return str;
+            } else {
+                return parser.getError();
+            }
+        }
+
+        @Override
+        protected void done() {
+            try { 
+                textArea.setText(get());
+            } catch (Exception e) {
+                textArea.setText(e.getMessage());
             }
         }
     }
