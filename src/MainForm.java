@@ -26,6 +26,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileSystemView;
 
 public class MainForm {
     private static String title = "Facebook Key Hash Reader v0.1";
@@ -66,7 +67,9 @@ public class MainForm {
     private class BrowseButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            final JFileChooser fileChooser = new JFileChooser();
+            FileSystemView fileSystemView = FileSystemView.getFileSystemView();
+            
+            final JFileChooser fileChooser = new JFileChooser(fileSystemView.getHomeDirectory());
             if( fileChooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION ) {
                 return;
             }
