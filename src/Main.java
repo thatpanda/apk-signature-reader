@@ -1,7 +1,7 @@
 /* 
  * © 2013 thatpanda
  * 
- * Facebook Key Hash Reader v0.2
+ * APK Signature Reader v0.3
  * 
  * Get Facebook key hash for the given Android app.
  * Created for verification, and educational purpose.
