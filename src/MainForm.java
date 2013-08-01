@@ -96,25 +96,17 @@ public class MainForm {
         
         @Override
         public String doInBackground() {
-            PackageParser parser = new PackageParser();
-            String[] keyhashes = parser.getFacebookKeyHashes(filepath);
-            if (keyhashes != null ) {
-                String str = "";
-                for (String keyhash : keyhashes) {
-                    if (!str.isEmpty()) {
-                        str += "\n";
-                    }
-                    str += keyhash;
-                }
-                return str;
-            } else {
-                return parser.getError();
+            Controller controller = new Controller();
+            String keyhashes = controller.getKeyHashes(filepath);
+            if (keyhashes == null ) {
+                return controller.getError();
             }
+            return keyhashes;
         }
 
         @Override
         protected void done() {
-            try { 
+            try {
                 textArea.setText(get());
             } catch (Exception e) {
                 textArea.setText(e.getMessage());

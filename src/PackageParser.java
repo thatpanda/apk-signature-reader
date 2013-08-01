@@ -18,10 +18,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.WeakReference;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -34,37 +31,6 @@ public class PackageParser {
     
     public String getError() {
         return lastError;
-    }
-    
-    public String[] getFacebookKeyHashes( String archiveSourcePath ) {
-        Certificate[] certificates = collectCertificates(archiveSourcePath);
-        if (certificates == null ) {
-            return null;
-        }
-        
-        try {
-            final int N = certificates.length;
-            String[] keyhashes = new String[N];
-            for (int i=0; i<N; i++) {
-                System.out.println(i + ".\n" +
-                    "Type: " + certificates[i].getType() + "\n" +
-                    "Public key: " + certificates[i].getPublicKey() + "\n");
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(certificates[i].getEncoded());
-                keyhashes[i] = Base64.encodeToString(md.digest(), Base64.DEFAULT);
-                System.out.print("Facebook KeyHash: " + keyhashes[i]);
-            }
-            
-            return keyhashes;
-        } catch (CertificateEncodingException e) {
-            lastError = "Exception reading " + archiveSourcePath + "\n" + e.getMessage();
-            System.err.println(lastError);
-        } catch (NoSuchAlgorithmException e) {
-            lastError = e.getMessage();
-            System.err.println(lastError);
-        }
-        
-        return null;
     }
     
     // based on core/java/android/content/pm/PackageParser.java
