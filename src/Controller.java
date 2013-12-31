@@ -46,10 +46,12 @@ public class Controller
             {
                 String MD5 = keytool.getCertFingerPrint( "MD5", cert );
                 String SHA1 = keytool.getCertFingerPrint( "SHA1", cert );
+                String SHA256 = keytool.getCertFingerPrint( "SHA-256", cert );
                 String FacebookHash = getFacebookKeyHash( cert );
                 
                 keyhashes += "MD5: " + MD5 + "\n";
                 keyhashes += "SHA1: " + SHA1 + "\n";
+                keyhashes += "SHA256: " + SHA256 + "\n";
                 keyhashes += "Facebook hash: " + FacebookHash + "\n\n";
             }
             catch(Exception e)
