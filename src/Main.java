@@ -1,7 +1,7 @@
 /* 
  * © 2013 thatpanda
  * 
- * APK Signature Reader v0.3
+ * APK Signature Reader
  * 
  * Get Facebook key hash for the given Android app.
  * Created for verification, and educational purpose.
