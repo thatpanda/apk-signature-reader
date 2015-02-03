@@ -30,7 +30,7 @@ import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileSystemView;
 
 public class MainForm {
-    private static String title = "APK Signature Reader v0.4";
+    private static String title = "APK Signature Reader v0.5";
     
     private JFrame frame = null;
     
