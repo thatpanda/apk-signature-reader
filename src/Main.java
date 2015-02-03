@@ -19,11 +19,10 @@
  * limitations under the License.
  */
 
-public class Main
-{
-    public static void main(String[] args)
-    {
-        MainForm form = new MainForm();
+public class Main {
+    public static void main(String[] args) {
+        Controller controller = new Controller();
+        MainForm form = new MainForm(controller);
         form.show();
     }
 }

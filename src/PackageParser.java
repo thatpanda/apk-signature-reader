@@ -24,17 +24,24 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class PackageParser {
-    private String lastError = "";
-    
     private final Object mSync = new Object();
     private WeakReference<byte[]> mReadBuffer;
     
-    public String getError() {
-        return lastError;
+    public class Certificates {
+        public Exception error = null;
+        public Certificate[] certs = null;
+        
+        public Certificates(Exception e) {
+            error = e;
+        }
+        
+        public Certificates(Certificate[] c) {
+            certs = c;
+        }
     }
     
     // based on core/java/android/content/pm/PackageParser.java
-    public Certificate[] collectCertificates(String archiveSourcePath) {
+    public Certificates collectCertificates(String archiveSourcePath) {
         WeakReference<byte[]> readBufferRef;
         byte[] readBuffer = null;
         synchronized (mSync) {
@@ -66,11 +73,11 @@ public class PackageParser {
 
                 certs = loadCertificates(jarFile, je, readBuffer);
                 if (certs == null) {
-                    lastError = "Package has no certificates at entry "
-                            + je.getName() + "; ignoring!";
-                    System.err.println(lastError);
                     jarFile.close();
-                    return null;
+                    RuntimeException e = new RuntimeException("Package has no certificates at entry "
+                            + je.getName() + "; ignoring!");
+                    System.err.println(e.getMessage());
+                    return new Certificates(e);
                 }
             }
             jarFile.close();
@@ -80,20 +87,19 @@ public class PackageParser {
             }
 
             if (certs != null && certs.length > 0) {
-                return certs;
+                return new Certificates(certs);
             } else {
-                lastError = "Package has no certificates; ignoring!";
-                System.err.println(lastError);;
+                RuntimeException e = new RuntimeException("Package has no certificates; ignoring!");
+                System.err.println(e.getMessage());
+                return new Certificates(e);
             }
         } catch (IOException e) {
-            lastError = "Exception reading " + archiveSourcePath + "\n" + e.getMessage();
-            System.err.println(lastError);
+            System.err.println("Exception reading " + archiveSourcePath + "\n" + e.getMessage());
+            return new Certificates(e);
         } catch (RuntimeException e) {
-            lastError = "Exception reading " + archiveSourcePath + "\n" + e.getMessage();
-            System.err.println(lastError);
+            System.err.println("Exception reading " + archiveSourcePath + "\n" + e.getMessage());
+            return new Certificates(e);
         }
-
-        return null;
     }
     
     // based on core/java/android/content/pm/PackageParser.java
@@ -109,13 +115,11 @@ public class PackageParser {
             is.close();
             return je != null ? je.getCertificates() : null;
         } catch (IOException e) {
-            lastError = "Exception reading " + je.getName() + " in "
-                    + jarFile.getName() + "\n" + e.getMessage();
-            System.err.println(lastError);
+            System.err.println("Exception reading " + je.getName() + " in "
+                    + jarFile.getName() + "\n" + e.getMessage());
         } catch (RuntimeException e) {
-            lastError = "Exception reading " + je.getName() + " in "
-                    + jarFile.getName() + "\n" + e.getMessage();
-            System.err.println(lastError);
+            System.err.println("Exception reading " + je.getName() + " in "
+                    + jarFile.getName() + "\n" + e.getMessage());
         }
         return null;
     }

@@ -26,10 +26,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileSystemView;
 
-public class MainForm {
+public class MainForm implements Controller.Callback {
     private static String title = "APK Signature Reader v0.5";
     
     private JFrame frame = null;
@@ -39,7 +38,12 @@ public class MainForm {
     private JButton browseButton = null;
     private TextArea textArea = null;
     
-    public MainForm() {
+    private Controller controller;
+    private Controller.Callback callback = this;
+    
+    public MainForm(Controller c) {
+        controller = c;
+        
         fileLabel = new JLabel();
         
         browseButton = new JButton("Select apk");
@@ -60,8 +64,26 @@ public class MainForm {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
     
-    public void show()
-    {
+    /**
+     * Controller.Callback interface
+     */
+    @Override
+    public void getKeyHashesComplete(Controller.KeyHashes result) {
+        if (result.error != null) {
+            textArea.setText(result.error.getMessage());
+            return;
+        }
+        
+        String message = "";
+        message += "MD5: " + result.MD5 + "\n";
+        message += "SHA1: " + result.SHA1 + "\n";
+        message += "SHA256: " + result.SHA256 + "\n";
+        message += "Facebook hash: " + result.FacebookHash;
+        System.out.println(message);
+        textArea.setText(message);
+    }
+    
+    public void show() {
         frame.setVisible(true);
     }
     
@@ -73,44 +95,19 @@ public class MainForm {
             final JFileChooser fileChooser = new JFileChooser(fileSystemView.getHomeDirectory());
             fileChooser.setFileFilter(new ApkFilter());
             
-            if( fileChooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION ) {
+            if (fileChooser.showOpenDialog(frame) != JFileChooser.APPROVE_OPTION) {
                 return;
             }
             
             File file = fileChooser.getSelectedFile();
-            if (file != null) {
-                fileLabel.setText(file.getName());
-                textArea.setText("loading...");
-                
-                new ParseFileTask(file.getAbsolutePath()).execute();
+            if (file == null) {
+                return;
             }
-        }
-    }
-    
-    private class ParseFileTask extends SwingWorker<String, Object> {
-        private String filepath;
-        
-        public ParseFileTask(String path) {
-            filepath = path;
-        }
-        
-        @Override
-        public String doInBackground() {
-            Controller controller = new Controller();
-            String keyhashes = controller.getKeyHashes(filepath);
-            if (keyhashes == null ) {
-                return controller.getError();
-            }
-            return keyhashes;
-        }
-
-        @Override
-        protected void done() {
-            try {
-                textArea.setText(get());
-            } catch (Exception e) {
-                textArea.setText(e.getMessage());
-            }
+            
+            fileLabel.setText(file.getName());
+            textArea.setText("loading...");
+            
+            controller.getKeyHashes(file.getAbsolutePath(), callback);
         }
     }
 }
