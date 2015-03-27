@@ -28,7 +28,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileSystemView;
 
-public class MainForm implements Controller.Callback {
+public class MainForm implements Controller.Callback, FileTransferHandler.Callback {
     private static String title = "APK Signature Reader v0.5";
     
     private JFrame frame = null;
@@ -62,6 +62,7 @@ public class MainForm implements Controller.Callback {
         frame.add(textArea,BorderLayout.CENTER);
         frame.setSize(500, 200);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setTransferHandler(new FileTransferHandler(this));
     }
     
     /**
@@ -83,6 +84,14 @@ public class MainForm implements Controller.Callback {
         textArea.setText(message);
     }
     
+    /**
+     * FileTransferHandler.Callback interface
+     */
+    @Override
+    public void handleFileDrop(File file) {
+        getKeyHashes(file);
+    }
+    
     public void show() {
         frame.setVisible(true);
     }
@@ -99,15 +108,24 @@ public class MainForm implements Controller.Callback {
                 return;
             }
             
-            File file = fileChooser.getSelectedFile();
-            if (file == null) {
-                return;
-            }
-            
-            fileLabel.setText(file.getName());
-            textArea.setText("loading...");
-            
-            controller.getKeyHashes(file.getAbsolutePath(), callback);
+            getKeyHashes(fileChooser.getSelectedFile());
         }
+    }
+    
+    private void getKeyHashes(File file) {
+        if (file == null) {
+            return;
+        }
+        
+        fileLabel.setText(file.getName());
+        textArea.setText("loading...");
+        
+        ApkFilter fileFilter = new ApkFilter();
+        if (!file.isFile() || !fileFilter.accept(file)) {
+            textArea.setText("un-supported file type");
+            return;
+        }
+        
+        controller.getKeyHashes(file.getAbsolutePath(), callback);
     }
 }
